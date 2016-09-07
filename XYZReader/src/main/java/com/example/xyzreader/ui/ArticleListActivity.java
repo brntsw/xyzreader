@@ -7,14 +7,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -33,28 +36,30 @@ import com.example.xyzreader.data.UpdaterService;
 public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private Toolbar mToolbar;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private static String TAG = ArticleListActivity.class.getSimpleName();
+
     private RecyclerView mRecyclerView;
+
+    private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (UpdaterService.BROADCAST_ACTION_STATE_CHANGE.equals(intent.getAction())) {
+                boolean isRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
+                updateRefreshingUI(isRefreshing);
+            }
+        }
+    };
+
+    private Snackbar mSnackBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-
-        final View toolbarContainerView = findViewById(R.id.toolbar_container);
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mSwipeRefreshLayout.setProgressViewOffset(false, 0,100);
-        }
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
+        supportPostponeEnterTransition();
 
         if (savedInstanceState == null) {
             refresh();
@@ -78,20 +83,23 @@ public class ArticleListActivity extends AppCompatActivity implements
         unregisterReceiver(mRefreshingReceiver);
     }
 
-    private boolean mIsRefreshing = false;
+    private void updateRefreshingUI(boolean isRefreshing) {
 
-    private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (UpdaterService.BROADCAST_ACTION_STATE_CHANGE.equals(intent.getAction())) {
-                mIsRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
-                updateRefreshingUI();
+        if (mSnackBar == null) {
+            View rootView = findViewById(R.id.coordinator);
+            // Could have set this to indefinite, but since we dont know if we will
+            // ever receive a message that refresh is over, just use LENGTH long instead.
+            mSnackBar = Snackbar.make(rootView, getString(R.string.refreshing), Snackbar.LENGTH_LONG);
+        }
+        if (isRefreshing) {
+            if (!mSnackBar.isShown()) {
+                mSnackBar.show();
+            }
+        } else {
+            if (mSnackBar.isShown()) {
+                mSnackBar.dismiss();
             }
         }
-    };
-
-    private void updateRefreshingUI() {
-        mSwipeRefreshLayout.setRefreshing(mIsRefreshing);
     }
 
     @Override
@@ -107,7 +115,10 @@ public class ArticleListActivity extends AppCompatActivity implements
         int columnCount = getResources().getInteger(R.integer.list_column_count);
         StaggeredGridLayoutManager sglm =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
+
         mRecyclerView.setLayoutManager(sglm);
+
+        supportStartPostponedEnterTransition();
     }
 
     @Override
@@ -135,8 +146,16 @@ public class ArticleListActivity extends AppCompatActivity implements
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    long itemId = getItemId(vh.getAdapterPosition());
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            ItemsContract.Items.buildItemUri(itemId));
+                    ActivityOptionsCompat activityOptions =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(ArticleListActivity.this,
+                                    new Pair<View, String>(vh.thumbnailView, getString(R.string.detail_icon_transition_name) + itemId));
+
+                    Log.d(TAG, "Transitioning to: " + getString(R.string.detail_icon_transition_name) + itemId);
+
+                    ActivityCompat.startActivity(ArticleListActivity.this, intent, activityOptions.toBundle());
                 }
             });
             return vh;
@@ -145,6 +164,7 @@ public class ArticleListActivity extends AppCompatActivity implements
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
+            long itemId = mCursor.getLong(ArticleLoader.Query._ID);
             holder.titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
             holder.subtitleView.setText(
                     DateUtils.getRelativeTimeSpanString(
@@ -156,6 +176,7 @@ public class ArticleListActivity extends AppCompatActivity implements
             holder.thumbnailView.setImageUrl(
                     mCursor.getString(ArticleLoader.Query.THUMB_URL),
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
+            ViewCompat.setTransitionName(holder.thumbnailView, "iconView" + itemId);
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
         }
 
