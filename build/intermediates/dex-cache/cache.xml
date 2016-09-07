@@ -44,13 +44,6 @@
         <dex dex="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\pre-dexed\debug\classes-7639219bde650b0499fc0c37fd62ba81268fa91f.jar" />
     </item>
     <item
-        jar="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.0.0\classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="4fcf0b1879f8caf497c073e1432d398e9e2988c1">
-        <dex dex="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\pre-dexed\debug\classes-3cd5ac3b8173c56d5a698c80cb7af03e4b6710cd.jar" />
-    </item>
-    <item
         jar="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.0.0\classes.jar"
         jumboMode="false"
         revision="22.0.1"
@@ -70,6 +63,20 @@
         revision="22.0.1"
         sha1="7052283359001bb108753cb0583a887d3bf94c82">
         <dex dex="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\pre-dexed\debug\okhttp-3.1.2-6cbfd13811b1e68f02cc67553248bad16671894a.jar" />
+    </item>
+    <item
+        jar="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\exploded-aar\com.android.support\design\23.0.1\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e5c61a3169221a89654ffcaaed47bba51cf071ad">
+        <dex dex="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\pre-dexed\debug\classes-8d7950f3265c1e830c08292c1066e2d3d6ae240b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.0.1\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="d86429b0f0b3f3cafbeb78dda1b9d89119ccb05d">
+        <dex dex="C:\Users\Bruno\AndroidStudioProjects\xyzreader\XYZReader\build\intermediates\pre-dexed\debug\classes-917704b845302262ab297ed14d1c95d268947dd6.jar" />
     </item>
     <item
         jar="C:\Users\Bruno\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.1.1\support-annotations-23.1.1.jar"

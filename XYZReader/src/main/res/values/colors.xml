@@ -24,4 +24,6 @@
     <color name="ltgray">#ffe0e0e0</color>
 
     <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#000000</color>
 </resources>
