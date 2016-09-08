@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -39,6 +40,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     private static String TAG = ArticleListActivity.class.getSimpleName();
 
     private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
@@ -50,14 +52,19 @@ public class ArticleListActivity extends AppCompatActivity implements
         }
     };
 
-    private Snackbar mSnackBar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateRefreshingUI(false);
+            }
+        });
         getLoaderManager().initLoader(0, null, this);
         supportPostponeEnterTransition();
 
@@ -84,22 +91,7 @@ public class ArticleListActivity extends AppCompatActivity implements
     }
 
     private void updateRefreshingUI(boolean isRefreshing) {
-
-        if (mSnackBar == null) {
-            View rootView = findViewById(R.id.coordinator);
-            // Could have set this to indefinite, but since we dont know if we will
-            // ever receive a message that refresh is over, just use LENGTH long instead.
-            mSnackBar = Snackbar.make(rootView, getString(R.string.refreshing), Snackbar.LENGTH_LONG);
-        }
-        if (isRefreshing) {
-            if (!mSnackBar.isShown()) {
-                mSnackBar.show();
-            }
-        } else {
-            if (mSnackBar.isShown()) {
-                mSnackBar.dismiss();
-            }
-        }
+        swipeRefreshLayout.setRefreshing(isRefreshing);
     }
 
     @Override
